@@ -55,8 +55,8 @@ input::placeholder{color:#6d7690}
 .row .d{flex:1;font-weight:600;font-size:14px;word-break:break-word}
 .row .a{font-family:'Barlow Condensed';font-weight:700;font-size:18px;direction:ltr}
 .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.05);color:var(--red);font-size:14px;cursor:pointer;flex:none}
-.ck{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);background:transparent;flex:none;cursor:pointer}
-.ck:checked{background:var(--cy);border-color:var(--cy)}
+.ck{-webkit-appearance:none;appearance:none;width:12px;height:12px;padding:0;border-radius:50%;border:1.5px solid var(--bd);background:transparent;flex:none;cursor:pointer}
+.ck:checked{background:#2a45e6;border-color:#2a45e6}
 .bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:4px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px;font-size:14px}
 h2{font-size:30px;margin:0 0 4px;font-weight:800;line-height:1.05}
@@ -123,8 +123,7 @@ details.mcard .mbody{padding:0 16px 16px}
 .inc-row .d2{flex:1;min-width:0}
 .inc-row .d2 b{display:block;font-size:14px}
 .inc-row .d2 span{font-size:12px;color:var(--mut)}
-.inc-row .a2{font-family:'Barlow Condensed';font-weight:700;font-size:19px;color:#7ee8a8;direction:ltr;min-width:76px;text-align:center}
-.inc-row .inc-date{font-size:12px;color:var(--mut);white-space:nowrap;min-width:88px;text-align:center}
+.inc-row .a2{font-family:'Barlow Condensed';font-weight:700;font-size:19px;color:#7ee8a8;direction:ltr}
 .fld{position:relative;z-index:1}
 .topright{display:flex;align-items:center;gap:10px}
 .dname{font-weight:700;font-size:15px;color:var(--cy)}
@@ -141,6 +140,30 @@ details.mcard .mbody{padding:0 16px 16px}
 .newspace{display:flex;gap:8px;margin-top:12px}
 .newspace input{flex:1}
 .newspace button{flex:none;padding:13px 16px}
+.pen{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.05);color:var(--cy);font-size:13px;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
+.srow .sdel{width:26px;height:26px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.05);color:var(--red);font-size:12px;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
+.srow .main{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+input[type=date]{color-scheme:dark}
+.idx{width:24px;height:24px;border-radius:50%;background:rgba(165,243,252,.1);color:var(--cy);font-family:'Barlow Condensed';font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+#editBody{display:grid;gap:10px}
+textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--ink);border-radius:13px;padding:13px 12px;font:600 15px 'Cairo',sans-serif;outline:none;min-height:110px;resize:vertical}
+.trail{display:flex;align-items:center;gap:8px;flex:none}
+.editpanel{position:fixed;left:14px;right:14px;top:calc(16px + env(safe-area-inset-top,0px));z-index:24;background:#0d1030;border:1px solid var(--bd);border-radius:20px;max-height:min(70vh,calc(100vh - 300px));overflow-y:auto;padding:18px}
+#editOverlay{z-index:23}
+#confirmOverlay{z-index:25}
+.confirmbox{position:fixed;left:22px;right:22px;top:50%;transform:translateY(-50%);z-index:26;background:#0d1030;border:1px solid var(--bd);border-radius:18px;padding:20px;max-width:440px;margin:0 auto}
+#confirmMsg{font-size:15px;line-height:1.8;margin-bottom:16px}
+.confirmbtns{display:flex;gap:10px}
+.confirmbtns .btn{flex:1}
+#confirmOk{background:linear-gradient(135deg,#d43a4a,#7a1c28)}
+.dsel{display:grid;gap:8px}
+.dselrow{display:grid;grid-template-columns:.8fr 1.3fr 1fr;gap:8px}
+.dman{direction:ltr;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px}
+.notewrite{width:100%;min-height:48vh;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:16px;color:var(--ink);font:400 15px 'Cairo',sans-serif;outline:none;resize:vertical;line-height:1.8;margin-top:14px}
+.nthead{margin-bottom:4px}
+.ntname{display:flex;align-items:center;gap:10px}
+.ntname h2{margin:0;flex:1;min-width:0;word-break:break-word}
+.ntdate{display:flex;align-items:center;gap:8px;margin-top:6px;color:var(--cy);font-size:14px;font-weight:600}
 .hide{display:none!important}
 </style>
 </head>
@@ -152,28 +175,58 @@ details.mcard .mbody{padding:0 16px 16px}
 <div id="sheetOverlay" class="sheet-overlay hide"></div>
 <div id="sheet" class="sheet hide">
   <div class="sheet-head"><b>الإعدادات</b><button id="sheetClose" class="x" aria-label="إغلاق">✕</button></div>
-  <div class="lab" style="margin-bottom:6px">اسم المساحة الحالية</div>
-  <input id="dispName" placeholder="اسم المساحة" autocomplete="off">
-  <div class="lab" style="margin:18px 0 8px">المساحات</div>
+  <div class="lab" id="spacesLab" style="margin-bottom:8px">اسم القسم</div>
   <div id="spaceList"></div>
-  <div class="newspace"><input id="newSpaceName" placeholder="اسم مساحة جديدة (مثلاً: مصروفات البيت)" autocomplete="off"><button class="btn" id="addSpaceBtn">إنشاء</button></div>
+  <div class="newspace"><input id="newSpaceName" placeholder="اسم قسم جديد (مثلاً: مصروفات البيت)" autocomplete="off"><button class="btn" id="addSpaceBtn">إنشاء</button></div>
+</div>
+<div id="editOverlay" class="sheet-overlay hide"></div>
+<div id="editSheet" class="editpanel hide">
+  <div class="sheet-head"><b id="editTitle">تعديل</b><button id="editClose" class="x" aria-label="إغلاق">✕</button></div>
+  <div id="editBody"></div>
+  <button class="btn" id="editSave" style="margin-top:14px;width:100%">حفظ</button>
+</div>
+<div id="confirmOverlay" class="sheet-overlay hide"></div>
+<div id="confirmBox" class="confirmbox hide">
+  <div id="confirmMsg"></div>
+  <div class="confirmbtns"><button class="btn ghost" id="confirmCancel">إلغاء</button><button class="btn" id="confirmOk">حذف نهائي</button></div>
 </div>
 <script>
 const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const ESS=['ايجار','إيجار','فاتورة','فواتير','كهرباء','مياه','غاز','انترنت','نت','دواء','علاج','دكتور','مدرسة','دراسة','قسط','اشتراك'];
 const DKEY='mx_display_name',SKEY='mx_spaces_v1',AKEY='mx_active_space';
-function activeSpaceObj(){return spaces.find(s=>s.id===activeSpace)||spaces[0]}
+const NSKEY='mx_note_sections_v1',NAKEY='mx_active_notesec',FNKEY='mx_notes_flat_v1',NMIGKEY='mx_notes_migrated_v1';
 const loadK=(k)=>{try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return []}};
 const saveK=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const EK=id=>id==='default'?'mx_expenses_v1':'mx_expenses_'+id;
 const IK=id=>id==='default'?'mx_incomes_v1':'mx_incomes_'+id;
+const NK=id=>'mx_notes_'+id;
+function activeSpaceObj(){return spaces.find(s=>s.id===activeSpace)||spaces[0]}
 let spaces=loadK(SKEY);if(!spaces.length){spaces=[{id:'default',name:'مصاريفي'}];saveK(SKEY,spaces)}
-let activeSpace=localStorage.getItem(AKEY)||'default';if(!spaces.some(s=>s.id===activeSpace))activeSpace='default';
+let activeSpace=localStorage.getItem(AKEY)||'default';if(!spaces.some(s=>s.id===activeSpace))activeSpace=spaces[0].id;
 const _legacyName=localStorage.getItem(DKEY);
 if(_legacyName){const _def=spaces.find(s=>s.id==='default');if(_def&&_def.name==='مصاريفي'){_def.name=_legacyName;saveK(SKEY,spaces)}}
 let data=loadK(EK(activeSpace)),incomes=loadK(IK(activeSpace));
 const save=()=>saveK(EK(activeSpace),data);
 const saveInc=()=>saveK(IK(activeSpace),incomes);
+function migrateOldNotes(){
+  if(localStorage.getItem(NMIGKEY))return;
+  try{
+    const oldSecs=loadK(NSKEY);
+    if(oldSecs&&oldSecs.length){
+      let flat=loadK(FNKEY);
+      oldSecs.forEach(sec=>{
+        const entries=loadK(NK(sec.id));
+        if(entries&&entries.length){
+          entries.forEach((en,i)=>{
+            const nm=(en.title&&en.title.trim())?en.title.trim():(sec.name+(entries.length>1?' '+(i+1):''));
+            flat.push({id:'nt'+(en.id?String(en.id).replace(/\./g,''):(Date.now()+Math.floor(Math.random()*100000))),name:nm,body:en.body||'',d:en.d||(new Date().toISOString().slice(0,10))})})}});
+      saveK(FNKEY,flat)}
+  }catch(e){}
+  try{localStorage.setItem(NMIGKEY,'1')}catch(e){}}
+migrateOldNotes();
+let notes=loadK(FNKEY);
+const saveNotesFlat=()=>saveK(FNKEY,notes);
+let activeNoteId='',noteView='list',noteSelMode=false,notePicked=new Set();
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const today=()=>iso(new Date());
@@ -199,15 +252,51 @@ function addInc(){
   const a=document.getElementById('inamt'),c=document.getElementById('icat');
   const v=toNum(a.value);
   if(!v||v<=0){a.focus();a.style.borderColor='var(--red)';return}
-  incomes.push({id:Date.now()+Math.random(),d:today(),a:v,cat:c.value.trim()});saveInc();render();
+  incomes.push({id:Date.now()+Math.random(),d:dselVal('idate'),a:v,cat:c.value.trim()});saveInc();render();
   kpHide()}
 function delInc(id){const gone=incomes.find(e=>e.id===id);incomes=incomes.filter(e=>e.id!==id);saveInc();render();
   if(gone)toast('تم حذف الإضافة','تراجع',()=>{incomes.push(gone);saveInc();render()})}
-function toast(msg,btn,fn){const el=document.getElementById('toast');clearTimeout(tt);el.innerHTML='<div class="toast"><span>'+msg+'</span><button id="tb">'+btn+'</button></div>';
-  document.getElementById('tb').onclick=()=>{fn();el.innerHTML=''};tt=setTimeout(()=>el.innerHTML='',6000)}
+function toast(msg,btn,fn){const el=document.getElementById('toast');clearTimeout(tt);el.innerHTML='<div class="toast"><span>'+msg+'</span>'+(btn?'<button id="tb">'+btn+'</button>':'')+'</div>';
+  if(btn)document.getElementById('tb').onclick=()=>{fn();el.innerHTML=''};tt=setTimeout(()=>el.innerHTML='',6000)}
 function years(){const s=new Set(data.map(e=>+e.d.slice(0,4)));const cy=new Date().getFullYear();for(let y=2024;y<=cy;y++)s.add(y);s.add(parts(sel)[0]);return [...s].sort((a,b)=>b-a)}
 function opts(arr,cur){return arr.map(([v,l])=>`<option value="${v}"${v==cur?' selected':''}>${l}</option>`).join('')}
 function topBar(){return `<div class="top"><div class="brand"><i></i>مصروفاتي</div><div class="topright"><span dir="ltr" class="dname">${esc(activeSpaceObj().name)}</span><button class="gear" id="settingsBtn" aria-label="الإعدادات">⋮</button></div></div>`}
+
+function dsel(prefix,curIso,noManual){
+  const iso_=curIso||today();
+  const [y,m,d]=parts(iso_);
+  const dim=new Date(y,m,0).getDate();
+  const ys=years();
+  return `<div class="dsel" data-p="${prefix}">
+    ${noManual?'':`<input type="text" id="${prefix}_manual" class="dman" placeholder="يوم/شهر/سنة" value="${d}/${m}/${y}" inputmode="numeric" autocomplete="off">`}
+    <div class="dselrow">
+      <select id="${prefix}_d" aria-label="اليوم">${opts(Array.from({length:dim},(_,i)=>[i+1,i+1]),d)}</select>
+      <select id="${prefix}_m" aria-label="الشهر">${opts(MN.map((n,i)=>[i+1,n]),m)}</select>
+      <select id="${prefix}_y" aria-label="السنة">${opts(ys.map(v=>[v,v]),y)}</select>
+    </div>
+  </div>`}
+function wireDsel(prefix){
+  const dd=document.getElementById(prefix+'_d'),mm=document.getElementById(prefix+'_m'),yy=document.getElementById(prefix+'_y'),man=document.getElementById(prefix+'_manual');
+  if(!dd||!mm||!yy||!man)return;
+  const syncFromSel=()=>{man.value=dd.value+'/'+mm.value+'/'+yy.value};
+  dd.onchange=mm.onchange=yy.onchange=syncFromSel}
+function dselVal(prefix){
+  const man=document.getElementById(prefix+'_manual');
+  if(man&&man.value.trim()){
+    const nums=man.value.trim().split(/[\/\-\.]/).map(s=>parseInt(toNum(s)));
+    if(nums.length>=3&&nums.every(n=>!isNaN(n))){
+      let [d,m,y]=nums;if(y<100)y+=2000;
+      m=Math.max(1,Math.min(12,m));
+      const dim=new Date(y,m,0).getDate();d=Math.max(1,Math.min(dim,d));
+      return y+'-'+pad(m)+'-'+pad(d)}}
+  const dd=document.getElementById(prefix+'_d'),mm=document.getElementById(prefix+'_m'),yy=document.getElementById(prefix+'_y');
+  if(dd&&mm&&yy)return +yy.value+'-'+pad(+mm.value)+'-'+pad(+dd.value);
+  return today()}
+function chain(fromId,nextId,fallback){
+  const el=document.getElementById(fromId);if(!el)return;
+  el.onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();
+    if(nextId){const nx=document.getElementById(nextId);if(nx){nx.focus({preventScroll:true});return}}
+    if(fallback)fallback()}}
 
 function vDay(){
   const [y,m,d]=parts(sel),list=data.filter(e=>e.d===sel),total=sum(data),dayT=sum(list);
@@ -238,7 +327,7 @@ function vDay(){
     <div class="bar"><span class="lab">عمليات ${d} ${MN[m-1]} · ${list.length}</span>
     ${list.length?`<button class="chip" onclick="selMode=!selMode;picked.clear();render()">${selMode?'إلغاء':'تحديد'}</button>`:''}</div>
     ${selMode&&list.length?`<div class="row"><input type="checkbox" class="ck" id="all" ${picked.size===list.length?'checked':''}><span class="d">تحديد الكل</span><button class="btn" style="padding:8px 14px;background:#b3283a" id="delsel" ${picked.size?'':'disabled style="opacity:.4"'}>حذف (${picked.size})</button></div>`:''}
-    ${list.length?list.map(e=>`<div class="row">${selMode?`<input type="checkbox" class="ck" data-id="${e.id}" ${picked.has(e.id)?'checked':''}>`:''}<div class="d">${esc(e.t)||'<span class="mut">بدون وصف</span>'}${e.note?`<div class="note">${esc(e.note)}</div>`:''}</div><span class="a">${fmt(e.a)}</span>${selMode?'':`<button class="x" data-del="${e.id}" aria-label="حذف">✕</button>`}</div>`).join('')
+    ${list.length?list.map(e=>`<div class="row">${selMode?`<input type="checkbox" class="ck" data-id="${e.id}" ${picked.has(e.id)?'checked':''}>`:''}<div class="d">${esc(e.t)||'<span class="mut">بدون وصف</span>'}${e.note?`<div class="note">${esc(e.note)}</div>`:''}</div><span class="a">${fmt(e.a)}</span>${selMode?'':`<button class="pen" data-edexp="${e.id}" aria-label="تعديل">✎</button><button class="x" data-del="${e.id}" aria-label="حذف">✕</button>`}</div>`).join('')
     :'<div class="empty">مفيش مصروفات في اليوم ده. اكتب المبلغ والوصف فوق وأضفه.</div>'}
   </div>`}
 
@@ -265,11 +354,13 @@ function vAdditions(){
   <div class="card form">
     <input id="inamt" class="amt" inputmode="none" placeholder="0" autocomplete="off">
     <input id="icat" enterkeyhint="done" placeholder="تصنيف الإضافة (مرتب، مكافأة…)" autocomplete="off">
-    <button class="btn" onclick="addInc()">إضافة</button>
+    <div class="lab" style="margin:4px 0 2px">تاريخ الإضافة</div>
+    ${dsel('idate',today(),true)}
+    <button class="btn" onclick="addInc()" style="margin-top:4px">إضافة</button>
   </div>
   <div class="card">
     <div class="lab" style="margin-bottom:4px">كل الإضافات</div>
-    ${list.length?`<div class="inc-row" style="font-size:11px;color:var(--mut);font-weight:700;padding-top:8px"><span style="width:34px"></span><span style="flex:1">البيان</span><span style="min-width:76px;text-align:center">المبلغ</span><span style="min-width:88px;text-align:center">التاريخ</span></div>`+list.map(e=>`<div class="inc-row"><button class="x" data-delinc="${e.id}" aria-label="حذف">✕</button><div class="d2"><b>${esc(e.cat)||'بدون تصنيف'}</b></div><div class="a2">${fmt(e.a)}</div><div class="inc-date">${fmtDate(e.d)}</div></div>`).join(''):'<div class="empty">لسه مفيش إضافات متسجلة.</div>'}
+    ${list.length?list.map(e=>`<div class="inc-row"><button class="pen" data-edinc="${e.id}" aria-label="تعديل">✎</button><button class="x" data-delinc="${e.id}" aria-label="حذف">✕</button><div class="d2"><b>${esc(e.cat)||'بدون تصنيف'}</b><span>${fmtDate(e.d)}</span></div><div class="a2">${fmt(e.a)}</div></div>`).join(''):'<div class="empty">لسه مفيش إضافات متسجلة.</div>'}
   </div>`}
 
 function vInsights(){
@@ -294,52 +385,104 @@ function vInsights(){
   <div class="card day"><div><div class="lab">متوسط الصرف اليومي</div><div class="mut">على ${days.size} يوم مسجل</div></div><div class="num">${fmt(total/days.size)}</div></div>
   <div class="card day"><div><div class="lab">أعلى يوم صرف</div><div class="mut">${fmtDate(mxd[0])}</div></div><div class="num">${fmt(mxd[1])}</div></div>`}
 
+function vNotes(){
+  if(noteView==='detail'&&activeNoteId){
+    const n=notes.find(x=>x.id===activeNoteId);
+    if(!n){noteView='list';activeNoteId='';return vNotes()}
+    return `<div class="top"><div class="brand"><i></i>مصروفاتي</div><div class="topright"><button class="gear" id="backNotes" aria-label="رجوع">→</button></div></div>
+    <div class="eyebrow">النوت</div>
+    <div class="nthead">
+      <div class="ntname"><h2>${esc(n.name)}</h2><button class="pen" id="renameNoteBtn" aria-label="تعديل الاسم">✎</button></div>
+      <div class="ntdate"><span>${fmtDate(n.d)}</span><button class="pen" id="editNoteDateBtn" aria-label="تعديل التاريخ">✎</button></div>
+    </div>
+    <textarea id="noteBody" class="notewrite" placeholder="اكتب هنا بلا حدود…">${esc(n.body)}</textarea>`}
+  return `${topBar()}
+  <div class="eyebrow">النوت</div><h2>دوّن <em>أفكارك</em></h2>
+  <div class="card form">
+    <input id="newNoteName" placeholder="اسم الملاحظة الجديدة" autocomplete="off">
+    <button class="btn" id="addNoteBtn">إنشاء</button>
+  </div>
+  <div class="card">
+    <div class="bar"><span class="lab">الملاحظات · ${notes.length}</span>
+    ${notes.length?`<button class="chip" onclick="noteSelMode=!noteSelMode;notePicked.clear();render()">${noteSelMode?'إلغاء':'تحديد'}</button>`:''}</div>
+    ${noteSelMode&&notes.length?`<div class="row"><input type="checkbox" class="ck" id="nall" ${notePicked.size===notes.length?'checked':''}><span class="d">تحديد الكل</span><button class="btn" style="padding:8px 14px;background:#b3283a" id="ndelsel" ${notePicked.size?'':'disabled style="opacity:.4"'}>حذف (${notePicked.size})</button></div>`:''}
+    ${notes.length?notes.map(n=>`<div class="row"${noteSelMode?'':` data-opennote="${n.id}"`}>${noteSelMode?`<input type="checkbox" class="ck" data-nid="${n.id}" ${notePicked.has(n.id)?'checked':''}>`:''}<div class="d"><b>${esc(n.name)}</b><div class="note">${fmtDate(n.d)}</div></div>${noteSelMode?'':`<button class="pen" data-rnnote="${n.id}" aria-label="تعديل">✎</button><button class="x" data-delnote="${n.id}" aria-label="حذف">✕</button>`}</div>`).join(''):'<div class="empty">لسه مفيش ملاحظات. اكتب اسم فوق وادوس إنشاء.</div>'}
+  </div>`}
+
 function render(){
-  const v=tab==='day'?vDay():tab==='months'?vMonths():tab==='add'?vAdditions():vInsights();
+  const v=tab==='day'?vDay():tab==='months'?vMonths():tab==='add'?vAdditions():tab==='notes'?vNotes():vInsights();
   const sy=window.scrollY;document.getElementById('app').innerHTML=v;document.body.classList.toggle('dayv',tab==='day'||tab==='add');window.scrollTo(0,sy);
-  document.getElementById('nav').innerHTML=[['day','◉','اليوم'],['months','▦','الشهور'],['add','⊕','الإضافات'],['ins','◭','التحليل']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" data-t="${k}"><span>${i}</span>${l}</button>`).join('');
+  document.getElementById('nav').innerHTML=[['day','◉','اليوم'],['months','▦','الشهور'],['add','⊕','الإضافات'],['notes','✎','النوت'],['ins','◭','التحليل']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" data-t="${k}"><span>${i}</span>${l}</button>`).join('');
   bind()}
+
+function wireClearButtons(){
+  ['amt','desc','note','inamt','icat','e_amt','e_desc','e_note','i_amt','i_cat','newNoteName','rn_name','sp_name'].forEach(id=>{
+    const i=document.getElementById(id);if(!i)return;
+    if(i.parentNode.classList.contains('fld'))return;
+    const w=document.createElement('div');w.className='fld';i.parentNode.insertBefore(w,i);w.appendChild(i);
+    if(['desc','note','icat','e_desc','e_note','i_cat','newNoteName','rn_name','sp_name'].includes(id))i.style.paddingInlineEnd='44px';
+    const b=document.createElement('button');b.type='button';b.className='clr hide';b.textContent='✕';b.setAttribute('aria-label','مسح');w.appendChild(b);
+    const upd2=()=>b.classList.toggle('hide',!i.value);
+    b.onpointerdown=e=>e.preventDefault();b.onclick=()=>{i.value='';upd2();i.focus({preventScroll:true})};i.oninput=upd2;upd2();
+    w.addEventListener('click',()=>{if(document.activeElement!==i)i.focus()})});}
+function wireAmtFields(){
+  document.querySelectorAll('input.amt').forEach(inp=>{
+    inp.onfocus=()=>{const y=window.scrollY;kpShow(inp.id);setTimeout(()=>window.scrollTo(0,y),60)};
+    inp.onblur=()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.classList.contains('amt'))kpHide()},150)});}
+
 function bind(){
-  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;selMode=false;picked.clear();render();scrollTo(0,0)});
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;selMode=false;picked.clear();noteSelMode=false;notePicked.clear();render();scrollTo(0,0)});
   const g=id=>document.getElementById(id);
   if(g('settingsBtn'))g('settingsBtn').onclick=openSheet;
   if(g('sd')){const f=()=>setDate(+g('sy').value,+g('sm').value,+g('sd').value);g('sd').onchange=g('sm').onchange=g('sy').onchange=f;}
-  ['amt','desc','note','inamt','icat'].forEach(id=>{const i=g(id);if(!i)return;
-    const w=document.createElement('div');w.className='fld';i.parentNode.insertBefore(w,i);w.appendChild(i);
-    if(id==='desc'||id==='note')i.style.paddingInlineEnd='44px';
-    const b=document.createElement('button');b.type='button';b.className='clr hide';b.textContent='\u2715';b.setAttribute('aria-label','مسح');w.appendChild(b);
-    b.onpointerdown=e=>e.preventDefault();b.onclick=()=>{i.value='';upd();i.focus({preventScroll:true})};i.oninput=upd;
-    w.addEventListener('click',()=>{if(document.activeElement!==i)i.focus()})});
-  if(g('amt')){g('desc').onkeydown=e=>{if(e.key==='Enter')g('note').focus()};g('note').onkeydown=e=>{if(e.key==='Enter')add()};
+  wireClearButtons();wireAmtFields();
+  if(g('amt')){
+    chain('desc','note');chain('note',null,add);
     document.querySelectorAll('.chip[data-c]').forEach(c=>c.onclick=()=>{g('desc').value=c.dataset.c;g('amt').focus()});
     document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>del([+b.dataset.del]));
+    document.querySelectorAll('[data-edexp]').forEach(b=>b.onclick=()=>editExpense(+b.dataset.edexp));
     document.querySelectorAll('.ck[data-id]').forEach(c=>c.onchange=()=>{c.checked?picked.add(+c.dataset.id):picked.delete(+c.dataset.id);render()});
     if(g('all'))g('all').onchange=e=>{picked.clear();if(e.target.checked)data.filter(x=>x.d===sel).forEach(x=>picked.add(x.id));render()};
     if(g('delsel'))g('delsel').onclick=()=>picked.size&&del([...picked])}
-  if(g('icat'))g('icat').onkeydown=e=>{if(e.key==='Enter')addInc()};
+  if(g('icat')){chain('icat',null,()=>g('icat').blur())}
+  if(g('idate_manual'))wireDsel('idate');
   document.querySelectorAll('[data-delinc]').forEach(b=>b.onclick=()=>delInc(+b.dataset.delinc));
-  document.querySelectorAll('input.amt').forEach(inp=>{
-    inp.onfocus=()=>{const y=window.scrollY;kpShow(inp.id);setTimeout(()=>window.scrollTo(0,y),60)};
-    inp.onblur=()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.classList.contains('amt'))kpHide()},150)});
-  if(g('my'))g('my').onchange=e=>{yr=+e.target.value;render()}}
-const NEXT={amt:'desc',inamt:'icat'};
+  document.querySelectorAll('[data-edinc]').forEach(b=>b.onclick=()=>editIncome(+b.dataset.edinc));
+  if(g('my'))g('my').onchange=e=>{yr=+e.target.value;render()};
+  if(g('backNotes'))g('backNotes').onclick=backNotes;
+  if(g('renameNoteBtn'))g('renameNoteBtn').onclick=()=>renameNote(activeNoteId);
+  if(g('editNoteDateBtn'))g('editNoteDateBtn').onclick=()=>editNoteDate(activeNoteId);
+  if(g('noteBody')){
+    const nb=g('noteBody');let nTimer;
+    nb.oninput=()=>{clearTimeout(nTimer);nTimer=setTimeout(()=>{const n=notes.find(x=>x.id===activeNoteId);if(n){n.body=nb.value;saveNotesFlat()}},350)}}
+  if(g('addNoteBtn'))g('addNoteBtn').onclick=()=>{const i=g('newNoteName');createNote(i.value);i.value=''};
+  if(g('newNoteName'))g('newNoteName').onkeydown=e=>{if(e.key==='Enter')g('addNoteBtn').click()};
+  document.querySelectorAll('[data-opennote]').forEach(r=>r.onclick=()=>openNote(r.dataset.opennote));
+  document.querySelectorAll('[data-rnnote]').forEach(b=>b.onclick=e=>{e.stopPropagation();renameNote(b.dataset.rnnote)});
+  document.querySelectorAll('[data-delnote]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteNotes([b.dataset.delnote])});
+  document.querySelectorAll('.ck[data-nid]').forEach(c=>c.onchange=()=>{c.checked?notePicked.add(c.dataset.nid):notePicked.delete(c.dataset.nid);render()});
+  if(g('nall'))g('nall').onchange=e=>{notePicked.clear();if(e.target.checked)notes.forEach(n=>notePicked.add(n.id));render()};
+  if(g('ndelsel'))g('ndelsel').onclick=()=>notePicked.size&&deleteNotes([...notePicked])}
+
+const NEXT={amt:'desc',inamt:'icat',e_amt:'e_desc',i_amt:'i_cat'};
 const kp=document.getElementById('kp');
-kp.innerHTML='<div class="kg"><div class="kd">'+['1','2','3','4','5','6','7','8','9','.','0','00'].map(k=>`<button data-k="${k}">${k}</button>`).join('')+'</div><div class="ks"><button data-k="del">\u232b</button><button data-k="next" class="nx">التالي ‹</button></div></div>';
+kp.innerHTML='<div class="kg"><div class="kd">'+['1','2','3','4','5','6','7','8','9','.','0','00'].map(k=>`<button data-k="${k}">${k}</button>`).join('')+'</div><div class="ks"><button data-k="del">⌫</button><button data-k="next" class="nx">التالي ‹</button></div></div>';
 function kpShow(id){kp.dataset.cur=id;kp.classList.remove('hide');document.body.classList.add('kpo')}
 function kpHide(){kp.classList.add('hide');document.body.classList.remove('kpo')}
-function upd(){['amt','desc','note','inamt','icat'].forEach(id=>{const i=document.getElementById(id),b=i&&i.parentNode.querySelector('.clr');if(b)b.classList.toggle('hide',!i.value)})}
 kp.onpointerdown=e=>e.preventDefault();
 kp.onclick=e=>{const k=e.target.closest('button');if(!k)return;const id=kp.dataset.cur,a=document.getElementById(id);if(!a)return;const c=k.dataset.k;
-  if(c==='next'){const nx=NEXT[id];if(nx){const el=document.getElementById(nx);if(el)el.focus({preventScroll:true})}return}
+  if(c==='next'){const nx=NEXT[id];if(nx){const el=document.getElementById(nx);if(el)el.focus({preventScroll:true})}else{a.blur();kpHide()}return}
   if(c==='del')a.value=a.value.slice(0,-1);
   else{if(c==='.'&&a.value.includes('.'))return;if(!a.value&&c==='00')return;if(c==='.'&&!a.value)a.value='0';if(a.value.length<12)a.value+=c}
-  upd();a.focus({preventScroll:true})};
+  a.dispatchEvent(new Event('input'));a.focus({preventScroll:true})};
 document.addEventListener('click',e=>{if(e.target.closest('#kp,input,.clr,select,label'))return;const a=document.activeElement;if(a&&a.classList&&a.classList.contains('amt'))a.blur();kpHide()});
 
 function renderSheet(){
-  document.getElementById('dispName').value=activeSpaceObj().name;
-  document.getElementById('spaceList').innerHTML=spaces.map(s=>`<div class="srow ${s.id===activeSpace?'on':''}" data-sw="${s.id}"><b>${esc(s.name)}</b><span class="chev">‹</span></div>`).join('');
-  document.querySelectorAll('[data-sw]').forEach(r=>r.onclick=()=>switchSpace(r.dataset.sw))}
+  document.getElementById('spacesLab').textContent='اسم القسم ('+spaces.length+')';
+  document.getElementById('spaceList').innerHTML=spaces.map(s=>`<div class="srow ${s.id===activeSpace?'on':''}" data-sw="${s.id}"><div class="main"><b>${esc(s.name)}</b></div><span class="trail"><button class="pen" data-rnspace="${s.id}" aria-label="تعديل">✎</button><button class="sdel" data-delspace="${s.id}" aria-label="حذف">✕</button><span class="chev">‹</span></span></div>`).join('');
+  document.querySelectorAll('[data-sw]').forEach(r=>r.onclick=()=>switchSpace(r.dataset.sw));
+  document.querySelectorAll('[data-rnspace]').forEach(b=>b.onclick=e=>{e.stopPropagation();renameSpace(b.dataset.rnspace)});
+  document.querySelectorAll('[data-delspace]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteSpace(b.dataset.delspace)})}
 function openSheet(){renderSheet();document.getElementById('sheetOverlay').classList.remove('hide');document.getElementById('sheet').classList.remove('hide')}
 function closeSheet(){document.getElementById('sheetOverlay').classList.add('hide');document.getElementById('sheet').classList.add('hide')}
 function switchSpace(id){
@@ -353,11 +496,80 @@ function addSpace(name){
   const id='s'+Date.now();
   spaces.push({id,name});saveK(SKEY,spaces);
   switchSpace(id)}
+function deleteSpace(id){
+  const sp=spaces.find(s=>s.id===id);if(!sp)return;
+  askConfirm('هتحذف قسم "'+sp.name+'" وكل بياناته نهائيًا. متأكد؟',()=>{
+    spaces=spaces.filter(s=>s.id!==id);
+    try{localStorage.removeItem(EK(id));localStorage.removeItem(IK(id))}catch(e){}
+    if(!spaces.length){spaces=[{id:'s'+Date.now(),name:'قسمي'}]}
+    saveK(SKEY,spaces);
+    if(id===activeSpace){activeSpace=spaces[0].id;localStorage.setItem(AKEY,activeSpace);data=loadK(EK(activeSpace));incomes=loadK(IK(activeSpace));tab='day';sel=today()}
+    render();renderSheet()})}
+function renameSpace(id){
+  const s=spaces.find(x=>x.id===id);if(!s)return;
+  openEdit('تعديل اسم القسم',`<input id="sp_name" value="${esc(s.name)}" placeholder="اسم القسم">`,()=>{
+    const v=document.getElementById('sp_name').value.trim();if(!v)return;
+    s.name=v;saveK(SKEY,spaces);render();renderSheet()})}
 document.getElementById('sheetOverlay').onclick=closeSheet;
 document.getElementById('sheetClose').onclick=closeSheet;
-document.getElementById('dispName').onchange=e=>{const v=e.target.value.trim();if(!v){e.target.value=activeSpaceObj().name;return}activeSpaceObj().name=v;saveK(SKEY,spaces);render();renderSheet()};
 document.getElementById('addSpaceBtn').onclick=()=>{const i=document.getElementById('newSpaceName');addSpace(i.value);i.value=''};
 document.getElementById('newSpaceName').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addSpaceBtn').click()};
+
+function backNotes(){activeNoteId='';noteView='list';render();scrollTo(0,0)}
+function openNote(id){activeNoteId=id;noteView='detail';render();scrollTo(0,0)}
+function createNote(name){name=name.trim();if(!name)return;const id='nt'+Date.now();notes.push({id,name,body:'',d:today()});saveNotesFlat();openNote(id)}
+function renameNote(id){
+  const n=notes.find(x=>x.id===id);if(!n)return;
+  openEdit('تعديل اسم الملاحظة',`<input id="rn_name" value="${esc(n.name)}" placeholder="اسم الملاحظة">`,()=>{
+    const v=document.getElementById('rn_name').value.trim();if(!v)return;
+    n.name=v;saveNotesFlat();render()})}
+function editNoteDate(id){
+  const n=notes.find(x=>x.id===id);if(!n)return;
+  openEdit('تعديل تاريخ الملاحظة',dsel('nd_edit',n.d),()=>{
+    n.d=dselVal('nd_edit');saveNotesFlat();render()});
+  wireDsel('nd_edit')}
+function deleteNotes(ids){
+  askConfirm(ids.length>1?'هتحذف '+ids.length+' ملاحظات نهائيًا. متأكد؟':'هتحذف الملاحظة دي نهائيًا. متأكد؟',()=>{
+    notes=notes.filter(n=>!ids.includes(n.id));saveNotesFlat();
+    if(ids.includes(activeNoteId)){activeNoteId='';noteView='list'}
+    notePicked.clear();noteSelMode=false;render()})}
+let confirmCb=null;
+function askConfirm(msg,onYes){
+  document.getElementById('confirmMsg').textContent=msg;
+  confirmCb=onYes;
+  document.getElementById('confirmOverlay').classList.remove('hide');
+  document.getElementById('confirmBox').classList.remove('hide')}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.add('hide');document.getElementById('confirmBox').classList.add('hide');confirmCb=null}
+document.getElementById('confirmOverlay').onclick=closeConfirm;
+document.getElementById('confirmCancel').onclick=closeConfirm;
+document.getElementById('confirmOk').onclick=()=>{const cb=confirmCb;closeConfirm();if(cb)cb()};
+
+let editCtx=null;
+function openEdit(title,bodyHTML,onSave){
+  document.getElementById('editTitle').textContent=title;
+  document.getElementById('editBody').innerHTML=bodyHTML;
+  editCtx=onSave;
+  wireClearButtons();wireAmtFields();
+  const af=document.querySelector('#editBody input.amt');if(af)setTimeout(()=>af.focus(),50);
+  document.getElementById('editOverlay').classList.remove('hide');document.getElementById('editSheet').classList.remove('hide')}
+function closeEdit(){document.getElementById('editOverlay').classList.add('hide');document.getElementById('editSheet').classList.add('hide');editCtx=null;kpHide()}
+document.getElementById('editOverlay').onclick=closeEdit;
+document.getElementById('editClose').onclick=closeEdit;
+document.getElementById('editSave').onclick=()=>{if(editCtx)editCtx();closeEdit()};
+
+function editExpense(id){
+  const e=data.find(x=>x.id===id);if(!e)return;
+  openEdit('تعديل المصروف',`<input id="e_amt" class="amt" inputmode="none" value="${e.a}"><input id="e_desc" list="dl" placeholder="الوصف" value="${esc(e.t)}"><input id="e_note" placeholder="ملاحظات (اختياري)" value="${esc(e.note||'')}">`,()=>{
+    const v=toNum(document.getElementById('e_amt').value);if(!v||v<=0)return;
+    e.a=v;e.t=document.getElementById('e_desc').value.trim();e.note=document.getElementById('e_note').value.trim();save();render()});
+  chain('e_desc','e_note');chain('e_note',null,()=>document.getElementById('editSave').click())}
+function editIncome(id){
+  const e=incomes.find(x=>x.id===id);if(!e)return;
+  openEdit('تعديل الإضافة',`<input id="i_amt" class="amt" inputmode="none" value="${e.a}"><input id="i_cat" placeholder="التصنيف" value="${esc(e.cat)}"><div class="lab" style="margin:4px 0 2px">التاريخ</div>${dsel('i_date',e.d)}`,()=>{
+    const v=toNum(document.getElementById('i_amt').value);if(!v||v<=0)return;
+    e.a=v;e.cat=document.getElementById('i_cat').value.trim();e.d=dselVal('i_date');saveInc();render()});
+  chain('i_cat',null,()=>document.getElementById('i_cat').blur());
+  wireDsel('i_date')}
 render();
 </script>
 </body>
