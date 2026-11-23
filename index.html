@@ -160,6 +160,14 @@ textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);
 .dselrow{display:grid;grid-template-columns:.8fr 1.3fr 1fr;gap:8px}
 .dman{direction:ltr;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px}
 .notewrite{width:100%;min-height:48vh;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:16px;color:var(--ink);font:400 15px 'Cairo',sans-serif;outline:none;resize:vertical;line-height:1.8;margin-top:14px}
+.sumrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.sumcard{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;min-width:0}
+.sumlab{font-size:10.5px;letter-spacing:1.2px;color:var(--mut);font-weight:700;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sumval{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;direction:ltr;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sumval.inc{color:#7ee8a8}
+.sumval.exp{color:var(--ink)}
+.sumval.pos{color:var(--cy)}
+.sumval.neg{color:var(--red)}
 .nthead{margin-bottom:4px}
 .ntname{display:flex;align-items:center;gap:10px}
 .ntname h2{margin:0;flex:1;min-width:0;word-break:break-word}
@@ -175,7 +183,9 @@ textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);
 <div id="sheetOverlay" class="sheet-overlay hide"></div>
 <div id="sheet" class="sheet hide">
   <div class="sheet-head"><b>الإعدادات</b><button id="sheetClose" class="x" aria-label="إغلاق">✕</button></div>
-  <div class="lab" id="spacesLab" style="margin-bottom:8px">اسم القسم</div>
+  <div class="lab" style="margin-bottom:8px">كل الأقسام مجمّعة</div>
+  <div id="sheetTotals"></div>
+  <div class="lab" id="spacesLab" style="margin:20px 0 8px">اسم القسم</div>
   <div id="spaceList"></div>
   <div class="newspace"><input id="newSpaceName" placeholder="اسم قسم جديد (مثلاً: مصروفات البيت)" autocomplete="off"><button class="btn" id="addSpaceBtn">إنشاء</button></div>
 </div>
@@ -477,7 +487,20 @@ kp.onclick=e=>{const k=e.target.closest('button');if(!k)return;const id=kp.datas
   a.dispatchEvent(new Event('input'));a.focus({preventScroll:true})};
 document.addEventListener('click',e=>{if(e.target.closest('#kp,input,.clr,select,label'))return;const a=document.activeElement;if(a&&a.classList&&a.classList.contains('amt'))a.blur();kpHide()});
 
+function globalTotals(){
+  let inc=0,exp=0;
+  spaces.forEach(s=>{
+    const sExp=s.id===activeSpace?data:loadK(EK(s.id));
+    const sInc=s.id===activeSpace?incomes:loadK(IK(s.id));
+    exp+=sum(sExp);inc+=sum(sInc)});
+  return {inc,exp,diff:inc-exp}}
 function renderSheet(){
+  const gt=globalTotals();
+  document.getElementById('sheetTotals').innerHTML=`<div class="sumrow">
+    <div class="sumcard"><div class="sumlab">الإضافات</div><div class="sumval inc">+${fmt(gt.inc)}</div></div>
+    <div class="sumcard"><div class="sumlab">المصروفات</div><div class="sumval exp">-${fmt(gt.exp)}</div></div>
+    <div class="sumcard"><div class="sumlab">المتبقي</div><div class="sumval ${gt.diff>=0?'pos':'neg'}">${gt.diff>=0?'+':'-'}${fmt(Math.abs(gt.diff))}</div></div>
+  </div>`;
   document.getElementById('spacesLab').textContent='اسم القسم ('+spaces.length+')';
   document.getElementById('spaceList').innerHTML=spaces.map(s=>`<div class="srow ${s.id===activeSpace?'on':''}" data-sw="${s.id}"><div class="main"><b>${esc(s.name)}</b></div><span class="trail"><button class="pen" data-rnspace="${s.id}" aria-label="تعديل">✎</button><button class="sdel" data-delspace="${s.id}" aria-label="حذف">✕</button><span class="chev">‹</span></span></div>`).join('');
   document.querySelectorAll('[data-sw]').forEach(r=>r.onclick=()=>switchSpace(r.dataset.sw));
