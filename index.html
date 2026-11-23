@@ -123,7 +123,8 @@ details.mcard .mbody{padding:0 16px 16px}
 .inc-row .d2{flex:1;min-width:0}
 .inc-row .d2 b{display:block;font-size:14px}
 .inc-row .d2 span{font-size:12px;color:var(--mut)}
-.inc-row .a2{font-family:'Barlow Condensed';font-weight:700;font-size:19px;color:#7ee8a8;direction:ltr}
+.inc-row .a2{font-family:'Barlow Condensed';font-weight:700;font-size:19px;color:#7ee8a8;direction:ltr;min-width:76px;text-align:center}
+.inc-row .inc-date{font-size:12px;color:var(--mut);white-space:nowrap;min-width:88px;text-align:center}
 .fld{position:relative;z-index:1}
 .topright{display:flex;align-items:center;gap:10px}
 .dname{font-weight:700;font-size:15px;color:var(--cy)}
@@ -268,7 +269,7 @@ function vAdditions(){
   </div>
   <div class="card">
     <div class="lab" style="margin-bottom:4px">كل الإضافات</div>
-    ${list.length?list.map(e=>`<div class="inc-row"><button class="x" data-delinc="${e.id}" aria-label="حذف">✕</button><div class="d2"><b>${esc(e.cat)||'بدون تصنيف'}</b><span>${fmtDate(e.d)}</span></div><div class="a2">${fmt(e.a)}</div></div>`).join(''):'<div class="empty">لسه مفيش إضافات متسجلة.</div>'}
+    ${list.length?`<div class="inc-row" style="font-size:11px;color:var(--mut);font-weight:700;padding-top:8px"><span style="width:34px"></span><span style="flex:1">البيان</span><span style="min-width:76px;text-align:center">المبلغ</span><span style="min-width:88px;text-align:center">التاريخ</span></div>`+list.map(e=>`<div class="inc-row"><button class="x" data-delinc="${e.id}" aria-label="حذف">✕</button><div class="d2"><b>${esc(e.cat)||'بدون تصنيف'}</b></div><div class="a2">${fmt(e.a)}</div><div class="inc-date">${fmtDate(e.d)}</div></div>`).join(''):'<div class="empty">لسه مفيش إضافات متسجلة.</div>'}
   </div>`}
 
 function vInsights(){
