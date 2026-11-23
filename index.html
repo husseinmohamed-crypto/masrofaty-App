@@ -55,7 +55,8 @@ input::placeholder{color:#6d7690}
 .row .d{flex:1;font-weight:600;font-size:14px;word-break:break-word}
 .row .a{font-family:'Barlow Condensed';font-weight:700;font-size:18px;direction:ltr}
 .x{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.05);color:var(--red);font-size:14px;cursor:pointer;flex:none}
-.ck{width:22px;height:22px;accent-color:#4d68ff;flex:none}
+.ck{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--bd);background:transparent;flex:none;cursor:pointer}
+.ck:checked{background:var(--cy);border-color:var(--cy)}
 .bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:4px}
 .empty{text-align:center;color:var(--mut);padding:26px 8px;font-size:14px}
 h2{font-size:30px;margin:0 0 4px;font-weight:800;line-height:1.05}
@@ -320,7 +321,7 @@ function bind(){
     inp.onfocus=()=>{const y=window.scrollY;kpShow(inp.id);setTimeout(()=>window.scrollTo(0,y),60)};
     inp.onblur=()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.classList.contains('amt'))kpHide()},150)});
   if(g('my'))g('my').onchange=e=>{yr=+e.target.value;render()}}
-const NEXT={amt:'note',inamt:'icat'};
+const NEXT={amt:'desc',inamt:'icat'};
 const kp=document.getElementById('kp');
 kp.innerHTML='<div class="kg"><div class="kd">'+['1','2','3','4','5','6','7','8','9','.','0','00'].map(k=>`<button data-k="${k}">${k}</button>`).join('')+'</div><div class="ks"><button data-k="del">\u232b</button><button data-k="next" class="nx">التالي ‹</button></div></div>';
 function kpShow(id){kp.dataset.cur=id;kp.classList.remove('hide');document.body.classList.add('kpo')}
