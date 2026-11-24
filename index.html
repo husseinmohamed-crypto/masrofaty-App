@@ -169,6 +169,23 @@ textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);
 .sumval.pos{color:var(--cy)}
 .sumval.neg{color:var(--red)}
 .gear.on{background:rgba(126,232,168,.22);border-color:#7ee8a8;color:#7ee8a8}
+.locksec{margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)}
+.lockrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lockrow .d{flex:1;min-width:0}
+.lockrow .note{font-size:12.5px;color:var(--mut);margin-top:2px}
+.lockwrap{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center}
+.lockbrand{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.lockbrand i{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--cy),var(--bl));display:inline-block}
+.locklab{color:var(--mut);font-size:14px;margin-top:-6px}
+.lockface{max-width:260px}
+.pindots{display:flex;gap:14px;margin:6px 0}
+.pd{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--bd);background:transparent}
+.pd.on{background:var(--cy);border-color:var(--cy)}
+.lockkp{display:grid;grid-template-columns:repeat(3,64px);gap:12px;margin-top:6px}
+.lockkp button{width:64px;height:64px;border-radius:50%;border:1px solid var(--bd);background:rgba(255,255,255,.05);color:var(--ink);font:600 20px 'Cairo',sans-serif}
+.lockkp button:active{background:rgba(255,255,255,.12)}
+.lockerr{color:var(--red);font-size:13px;min-height:18px}
+.lockcancel{color:var(--mut);font-size:13.5px;text-decoration:underline;background:none;border:none}
 .nbwrap{position:relative}
 .nbacktop{display:flex;justify-content:flex-end;margin-top:14px}
 .noteview{white-space:pre-wrap;word-break:break-word;overflow-y:auto;cursor:text}
@@ -194,6 +211,7 @@ textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);
   <div class="lab" id="spacesLab" style="margin:20px 0 8px">اسم القسم</div>
   <div id="spaceList"></div>
   <div class="newspace"><input id="newSpaceName" placeholder="اسم قسم جديد (مثلاً: مصروفات البيت)" autocomplete="off"><button class="btn" id="addSpaceBtn">إنشاء</button></div>
+  <div class="locksec" id="lockSection"></div>
 </div>
 <div id="editOverlay" class="sheet-overlay hide"></div>
 <div id="editSheet" class="editpanel hide">
@@ -206,6 +224,7 @@ textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--bd);
   <div id="confirmMsg"></div>
   <div class="confirmbtns"><button class="btn ghost" id="confirmCancel">إلغاء</button><button class="btn" id="confirmOk">حذف نهائي</button></div>
 </div>
+<div id="lockOverlay" class="lockwrap hide"></div>
 <script>
 const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const ESS=['ايجار','إيجار','فاتورة','فواتير','كهرباء','مياه','غاز','انترنت','نت','دواء','علاج','دكتور','مدرسة','دراسة','قسط','اشتراك'];
@@ -243,6 +262,96 @@ migrateOldNotes();
 let notes=loadK(FNKEY);
 const saveNotesFlat=()=>saveK(FNKEY,notes);
 let activeNoteId='',noteView='list',noteSelMode=false,notePicked=new Set();
+
+// ---- App lock (Face ID / Touch ID via WebAuthn, with PIN fallback) ----
+const LOCKKEY='mx_lock_v1';
+function loadLock(){try{return JSON.parse(localStorage.getItem(LOCKKEY))||{enabled:false}}catch(e){return{enabled:false}}}
+function saveLock(o){localStorage.setItem(LOCKKEY,JSON.stringify(o))}
+let lockState=loadLock();
+let pinBuf='',pinFirst='',pinMode='enter',lockCallback=null;
+async function sha256Hex(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function b64u(buf){return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function b64uToBuf(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf}
+async function registerFaceId(){
+  try{
+    if(!window.PublicKeyCredential)return false;
+    const cred=await navigator.credentials.create({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      rp:{name:'مصروفاتي'},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'owner',displayName:'صاحب الحساب'},
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+      timeout:60000}});
+    if(cred){lockState.webauthnId=b64u(cred.rawId);saveLock(lockState);return true}
+  }catch(e){}
+  return false}
+async function unlockWithFaceId(){
+  if(!lockState.webauthnId)return false;
+  try{
+    const assertion=await navigator.credentials.get({publicKey:{
+      challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{id:b64uToBuf(lockState.webauthnId),type:'public-key'}],
+      userVerification:'required',timeout:60000}});
+    return!!assertion
+  }catch(e){return false}}
+function lockTitle(){
+  if(pinMode==='setup1')return'اختار كود مكوّن من 4 أرقام';
+  if(pinMode==='setup2')return'أكّد الكود تاني';
+  return'التطبيق مقفول'}
+let lockErrMsg='';
+function renderLockScreen(){
+  const hasFace=pinMode==='enter'&&!!lockState.webauthnId;
+  const ov=document.getElementById('lockOverlay');
+  ov.innerHTML=`<div class="lockbrand"><i></i>مصروفاتي</div>
+    <div class="locklab">${lockTitle()}</div>
+    ${hasFace?`<button class="btn lockface" id="faceBtn">فتح بالتعرف على الوجه</button>`:''}
+    <div class="pindots">${Array.from({length:4},(_,i)=>`<span class="pd${i<pinBuf.length?' on':''}"></span>`).join('')}</div>
+    <div class="lockkp">${['1','2','3','4','5','6','7','8','9','','0','⌫'].map(k=>`<button type="button" data-lk="${k}" ${k===''?'style="visibility:hidden"':''}>${k}</button>`).join('')}</div>
+    <div class="lockerr" id="lockErr">${esc(lockErrMsg)}</div>
+    ${lockCallback?`<button type="button" class="lockcancel" id="lockCancelBtn">إلغاء</button>`:''}`;
+  document.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>lockKeyPress(b.dataset.lk));
+  if(document.getElementById('faceBtn'))document.getElementById('faceBtn').onclick=tryFaceUnlock;
+  if(document.getElementById('lockCancelBtn'))document.getElementById('lockCancelBtn').onclick=cancelLockFlow;
+  if(hasFace)tryFaceUnlock()}
+async function tryFaceUnlock(){
+  const ok=await unlockWithFaceId();
+  if(ok)completeUnlock()}
+function showLockOverlay(){
+  pinBuf='';pinFirst='';pinMode='enter';lockCallback=null;lockErrMsg='';
+  document.getElementById('lockOverlay').classList.remove('hide');
+  renderLockScreen()}
+function hideLockOverlay(){document.getElementById('lockOverlay').classList.add('hide')}
+function cancelLockFlow(){lockCallback=null;pinBuf='';pinFirst='';pinMode='enter';lockErrMsg='';hideLockOverlay()}
+function completeUnlock(){
+  if(lockCallback){const cb=lockCallback;lockCallback=null;pinBuf='';pinFirst='';pinMode='enter';lockErrMsg='';hideLockOverlay();cb();return}
+  pinBuf='';lockErrMsg='';hideLockOverlay()}
+async function lockKeyPress(k){
+  if(k==='')return;
+  if(k==='⌫'){pinBuf=pinBuf.slice(0,-1);renderLockScreen();return}
+  if(pinBuf.length>=4)return;
+  pinBuf+=k;lockErrMsg='';renderLockScreen();
+  if(pinBuf.length<4)return;
+  if(pinMode==='setup1'){pinFirst=pinBuf;pinBuf='';pinMode='setup2';renderLockScreen();return}
+  if(pinMode==='setup2'){
+    if(pinBuf!==pinFirst){lockErrMsg='الكود مش متطابق، حاول تاني';pinBuf='';pinFirst='';pinMode='setup1';renderLockScreen();return}
+    const salt=[...crypto.getRandomValues(new Uint8Array(8))].map(b=>b.toString(16).padStart(2,'0')).join('');
+    const hash=await sha256Hex(salt+pinFirst);
+    lockState={enabled:true,pinHash:hash,salt,webauthnId:lockState.webauthnId||null};saveLock(lockState);
+    await registerFaceId();
+    completeUnlock();return}
+  const hash=await sha256Hex((lockState.salt||'')+pinBuf);
+  if(hash===lockState.pinHash){completeUnlock()}
+  else{lockErrMsg='الكود غلط';pinBuf='';renderLockScreen()}}
+function startLockSetup(){
+  pinMode='setup1';pinBuf='';pinFirst='';lockErrMsg='';
+  lockCallback=()=>{toast('اتفعّل قفل التطبيق');openSheet()};
+  document.getElementById('lockOverlay').classList.remove('hide');renderLockScreen()}
+function startLockDisable(){
+  pinMode='enter';pinBuf='';lockErrMsg='';
+  lockCallback=()=>{lockState={enabled:false,pinHash:null,salt:null,webauthnId:null};saveLock(lockState);toast('اتلغى قفل التطبيق');openSheet()};
+  document.getElementById('lockOverlay').classList.remove('hide');renderLockScreen()}
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const today=()=>iso(new Date());
@@ -293,9 +402,16 @@ function dsel(prefix,curIso,noManual){
   </div>`}
 function wireDsel(prefix){
   const dd=document.getElementById(prefix+'_d'),mm=document.getElementById(prefix+'_m'),yy=document.getElementById(prefix+'_y'),man=document.getElementById(prefix+'_manual');
-  if(!dd||!mm||!yy||!man)return;
-  const syncFromSel=()=>{man.value=dd.value+'/'+mm.value+'/'+yy.value};
-  dd.onchange=mm.onchange=yy.onchange=syncFromSel}
+  if(!dd||!mm||!yy)return;
+  const syncFromSel=()=>{if(man)man.value=dd.value+'/'+mm.value+'/'+yy.value};
+  const refreshDays=()=>{
+    const y=+yy.value,m=+mm.value;
+    const dim=new Date(y,m,0).getDate();
+    const cur=Math.min(+dd.value,dim);
+    dd.innerHTML=opts(Array.from({length:dim},(_,i)=>[i+1,i+1]),cur)};
+  dd.onchange=syncFromSel;
+  mm.onchange=()=>{refreshDays();syncFromSel()};
+  yy.onchange=()=>{refreshDays();syncFromSel()}}
 function dselVal(prefix){
   const man=document.getElementById(prefix+'_manual');
   if(man&&man.value.trim()){
@@ -507,7 +623,7 @@ function bind(){
     if(g('all'))g('all').onchange=e=>{picked.clear();if(e.target.checked)data.filter(x=>x.d===sel).forEach(x=>picked.add(x.id));render()};
     if(g('delsel'))g('delsel').onclick=()=>picked.size&&del([...picked])}
   if(g('icat')){chain('icat',null,()=>g('icat').blur())}
-  if(g('idate_manual'))wireDsel('idate');
+  if(g('idate_d'))wireDsel('idate');
   bindIncRows();
   if(g('incFilter'))g('incFilter').addEventListener('input',()=>{incFilter=g('incFilter').value;document.getElementById('incListWrap').innerHTML=renderIncRows();bindIncRows()});
   if(g('my'))g('my').onchange=e=>{yr=+e.target.value;render()};
@@ -557,7 +673,9 @@ function renderSheet(){
   document.getElementById('spaceList').innerHTML=spaces.map(s=>`<div class="srow ${s.id===activeSpace?'on':''}" data-sw="${s.id}"><div class="main"><b>${esc(s.name)}</b></div><span class="trail"><button class="pen" data-rnspace="${s.id}" aria-label="تعديل">✎</button><button class="sdel" data-delspace="${s.id}" aria-label="حذف">✕</button><span class="chev">‹</span></span></div>`).join('');
   document.querySelectorAll('[data-sw]').forEach(r=>r.onclick=()=>switchSpace(r.dataset.sw));
   document.querySelectorAll('[data-rnspace]').forEach(b=>b.onclick=e=>{e.stopPropagation();renameSpace(b.dataset.rnspace)});
-  document.querySelectorAll('[data-delspace]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteSpace(b.dataset.delspace)})}
+  document.querySelectorAll('[data-delspace]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteSpace(b.dataset.delspace)});
+  document.getElementById('lockSection').innerHTML=`<div class="lockrow"><div class="d"><b>قفل التطبيق</b><div class="note">${lockState.enabled?'مفعّل — '+(lockState.webauthnId?'Face ID / Touch ID + كود':'كود دخول'):'مش مفعّل'}</div></div><button class="btn" id="lockToggleBtn" style="width:auto;padding:10px 18px">${lockState.enabled?'إيقاف':'تفعيل'}</button></div>`;
+  document.getElementById('lockToggleBtn').onclick=()=>{closeSheet();lockState.enabled?startLockDisable():startLockSetup()}}
 function openSheet(){renderSheet();document.getElementById('sheetOverlay').classList.remove('hide');document.getElementById('sheet').classList.remove('hide')}
 function closeSheet(){document.getElementById('sheetOverlay').classList.add('hide');document.getElementById('sheet').classList.add('hide')}
 function switchSpace(id){
@@ -646,6 +764,11 @@ function editIncome(id){
   chain('i_cat',null,()=>document.getElementById('i_cat').blur());
   wireDsel('i_date')}
 render();
+if(lockState.enabled)showLockOverlay();
+let appNeedsRelock=false;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){if(lockState.enabled&&!lockCallback)appNeedsRelock=true}
+  else if(appNeedsRelock){appNeedsRelock=false;showLockOverlay()}});
 </script>
 </body>
 </html>
